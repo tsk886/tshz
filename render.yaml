@@ -1,10 +1,11 @@
 services:
   - type: web
-    name: sms-bot
-    env: python
-    plan: free  # 可以根据需要选择计划
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python 短信轰炸.py"  # 使用你的主文件名
+    name: my-python-app  # 服务的名称，可以自定义
+    env: python          # 指定 Python 环境
+    buildCommand: "pip install -r requirements.txt"  # 构建命令，安装依赖项
+    startCommand: "python main.py"  # 启动命令，根据您的主脚本文件替换 "app.py"
     envVars:
-      - key: TELEGRAM_API_TOKEN
-        value: "<8139511082:AAFYL5BtHBxGaU9f9G2ihURBSBBN5592LgQ>"
+      - key: 8139511082:AAFYL5BtHBxGaU9f9G2ihURBSBBN5592LgQ     # 配置环境变量，例如 Telegram Bot 的 API Token
+        value: ${TELEGRAM_API_TOKEN}  # 在 Render 平台上设置环境变量值
+      
+    plan: free                      # 使用免费的计划，根据需要也可以更换为其他计划
