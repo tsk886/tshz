@@ -66,7 +66,7 @@ async def check_user_in_channel(context: CallbackContext, user_id: int) -> bool:
     try:
         chat_member = await context.bot.get_chat_member(chat_id=f"@{CHANNEL_USERNAME}", user_id=user_id)
         return chat_member.status in ["member", "administrator", "creator"]
-    except Exception as e:
+    except Exception:
         return False
 
 def add_points(inviter_id: int, points: int = 2):
@@ -149,7 +149,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("share", share))
     application.add_handler(CommandHandler("dxhz", dxhz))
-    application.add_handler(CommandHandler("start", handle_invitation, pass_args=True))
+    application.add_handler(CommandHandler("start", handle_invitation))
 
     application.run_polling()
 
