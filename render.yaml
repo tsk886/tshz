@@ -1,12 +1,10 @@
 services:
   - type: web
-    name: my-python-app  # 服务的名称，可以自定义
-    env: python          # 指定 Python 环境
-    buildCommand: "pip install -r requirements.txt"  # 构建命令，安装依赖项
-    startCommand: "python app.py"  # 启动命令，根据您的主脚本文件替换 "app.py"
+    name: my-python-app
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
     envVars:
-      - key: TELEGRAM_API_TOKEN     # 配置环境变量，例如 Telegram Bot 的 API Token
-        value: ${TELEGRAM_API_TOKEN}  # 在 Render 平台上设置环境变量值
-      - key: ANOTHER_API_KEY         # 配置其他可能需要的 API Key
-        value: ${ANOTHER_API_KEY}
-    plan: free                      # 使用免费的计划，根据需要也可以更换为其他计划
+      - key: TELEGRAM_API_TOKEN
+        value: "8139511082:AAFYL5BtHBxGaU9f9G2ihURBSBBN5592LgQ"
+    plan: free
