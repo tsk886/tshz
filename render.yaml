@@ -1,11 +1,18 @@
 services:
   - type: web
-    name: my-python-app
+    name: telegram-bot
     env: python
+    plan: free  # or a paid plan if you need more resources
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn 短信轰炸:app --bind 0.0.0.0:10000"
-    startCommand: "python main.py"
+    startCommand: "python your_script_name.py"  # replace with your script file name
     envVars:
-      - key: TELEGRAM_API_TOKEN
-        value: "8139511082:AAFYL5BtHBxGaU9f9G2ihURBSBBN5592LgQ"
-    plan: free
+      - key: TELEGRAM_TOKEN
+        value: <7897115663:AAHhFiB15GBy6dGqhfFV_CYVADlw-Yjw2g4>  # store your bot token here or use Render's environment variables feature
+      - key: ADMIN_ID
+        value: "1832036764"  # replace with actual admin ID if needed
+    healthCheckPath: "/"
+    disk:
+      - name: persistent_data
+        mountPath: /persistent_data  # optional if you need to store data persistently
+    autoDeploy: true
+    region: oregon  # set your preferred region
