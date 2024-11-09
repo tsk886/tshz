@@ -813,7 +813,7 @@ async def collect_time_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 if __name__ == '__main__':
     keep_alive()
-    app = ApplicationBuilder().token("7897115663:AAHhFiB15GBy6dGqhfFV_CYVADlw-Yjw2g4").build()
+    app = ApplicationBuilder().token("7897115663:AAG56gikZ4qUeOHtn3seZtAYXWfWDDMbt_Q").build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("start", handle_new_user_join))
     app.add_handler(CommandHandler("qd", qd))
