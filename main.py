@@ -382,7 +382,6 @@ async def collect_time_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
             f"https://apis.niuxuezhang.cn/v1/sms-code?phone={target_phone}",
             f"https://wccy-server.sxlyb.com/open/v1/login-code/{target_phone}?phone={target_phone}",
             f"https://mapi.ekwing.com/parent/user/sendcode?scenes=login&tel={target_phone}&v=9.0&os=Windows",
-            f"https://qxt.matefix.cn/api/wx/common/sendMsgCode?mobile={target_phone}",
             f"https://www.huameitang.com/api.php?do=getMobileCode&mobile={target_phone}",
             f"https://api.hichefu.com/client-openapi/driver/user/getVerifyCode?phone={target_phone}",
             f"https://www.xinmeinet.cn/api/user/getMsg?status=1&touch={target_phone}",
